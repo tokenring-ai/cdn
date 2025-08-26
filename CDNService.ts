@@ -1,5 +1,5 @@
-import ChatService from "@token-ring/chat/ChatService";
 import {type Registry, Service} from "@token-ring/registry";
+import CDNResource from "./CDNResource.js";
 
 export interface UploadOptions {
   filename?: string;
@@ -27,34 +27,59 @@ export default class CDNService extends Service {
   description = "Abstract interface for CDN operations";
   protected registry!: Registry;
 
-  constructor() {
-    super();
+  private resources: Record<string,CDNResource> = {};
+
+  registerCDN(name: string, resource: CDNResource) {
+    this.resources[name] = resource;
   }
 
-  /** Starts the service. */
-  async start(registry: Registry): Promise<void> {
-    this.registry = registry;
+  /**
+   * Returns a CDNResource by name.
+   * @param cdnName
+   * @returns CDNResource
+   * @throws Error if CDN not found
+   */
+  getCDNByName(cdnName: string): CDNResource {
+    if (this.resources[cdnName]) {
+      return this.resources[cdnName];
+    }
+    throw new Error(
+      `CDN ${cdnName} not found. Available CDNs: ${Object.keys(this.resources).join(", ")}`
+    )
   }
 
-  /** Stops the service. */
-  async stop(_registry: Registry): Promise<void> {
-    // Base implementation does nothing
+  async upload(cdnName: string, data: Buffer, options?: UploadOptions): Promise<UploadResult> {
+    return this.getCDNByName(cdnName).upload(data, options);
   }
 
-  // ABSTRACT INTERFACE
-  async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
-    throw new Error("Method 'upload' must be implemented by subclasses");
+  /**
+   * Optional method to delete a file from the CDN.
+   * @param cdnName
+   * @param url The URL of the file to delete.
+   * @returns A promise that resolves to a DeleteResult object indicating the success of the deletion.
+   * @throws An error if the deletion fails.
+   */
+  async delete(cdnName: string, url: string): Promise<DeleteResult> {
+    const cdn = this.getCDNByName(cdnName);
+    if (! cdn.delete) throw new Error(`CDN ${cdnName} does not support deletion`);
+
+    return cdn.delete(url);
   }
 
-  async delete(_url: string): Promise<DeleteResult> {
-    throw new Error("Method 'delete' must be implemented by subclasses");
+  /**
+   * Downloads a file from the CDN.
+   * @param cdnName
+   * @param url
+   */
+  async download(cdnName: string, url: string): Promise<Buffer> {
+    return this.getCDNByName(cdnName).download(url);
   }
-
-  async exists(_url: string): Promise<boolean> {
-    throw new Error("Method 'exists' must be implemented by subclasses");
-  }
-
-  async getMetadata(_url: string): Promise<Record<string, any> | null> {
-    throw new Error("Method 'getMetadata' must be implemented by subclasses");
+  /**
+   * Checks if a file exists in the CDN.
+   * @param cdnName
+   * @param url
+   */
+  async exists(cdnName: string, url: string): Promise<boolean> {
+    return this.getCDNByName(cdnName).exists(url);
   }
 }

@@ -16,6 +16,10 @@ export async function execute(
     throw new Error(`[${name}] 'url' parameter is required`);
   }
 
+  if (! cdnService.delete) {
+    throw new Error(`[${name}] CDN service does not support deletion`);
+  }
+
   chatService.infoLine(`[${name}] Deleting from CDN via ${cdnService.name}: ${url}`);
 
   const result = await cdnService.delete(url);
@@ -29,7 +33,7 @@ export async function execute(
   return result;
 }
 
-export const description = "Delete a file from CDN by URL";
+export const description = "Deletes a file from CDN by URL";
 
 export const inputSchema = z.object({
   url: z.string().describe("URL of the file to delete from CDN"),

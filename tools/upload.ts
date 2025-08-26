@@ -43,5 +43,5 @@ export const inputSchema = z.object({
   data: z.string().describe("Base64 encoded data to upload"),
   filename: z.string().describe("Optional filename for the uploaded file").optional(),
   contentType: z.string().describe("Optional MIME type of the file").optional(),
-  metadata: z.record(z.string()).describe("Optional metadata key-value pairs").optional(),
+  metadata: z.record(z.string(), z.any()).describe("Optional metadata key-value pairs").optional(),
 });
