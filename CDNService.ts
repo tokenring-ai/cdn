@@ -1,4 +1,5 @@
 import {type Registry, Service} from "@token-ring/registry";
+import GenericMultipleRegistry from "@token-ring/utility/GenericMultipleRegistry";
 import CDNResource from "./CDNResource.js";
 
 export interface UploadOptions {
