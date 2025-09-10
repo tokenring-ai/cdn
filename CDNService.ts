@@ -1,5 +1,4 @@
-import {type Registry, Service} from "@token-ring/registry";
-import GenericMultipleRegistry from "@token-ring/utility/GenericMultipleRegistry";
+import {TokenRingService} from "@tokenring-ai/agent/types";
 import CDNResource from "./CDNResource.js";
 
 export interface UploadOptions {
@@ -23,12 +22,11 @@ export interface DeleteResult {
  * CDN is an abstract class that provides a unified interface
  * for CDN operations, allowing for different implementations of CDN services.
  */
-export default class CDNService extends Service {
+export default class CDNService implements TokenRingService {
   name = "CDN";
   description = "Abstract interface for CDN operations";
-  protected registry!: Registry;
 
-  private resources: Record<string,CDNResource> = {};
+  private resources: Record<string, CDNResource> = {};
 
   registerCDN(name: string, resource: CDNResource) {
     this.resources[name] = resource;
@@ -62,7 +60,7 @@ export default class CDNService extends Service {
    */
   async delete(cdnName: string, url: string): Promise<DeleteResult> {
     const cdn = this.getCDNByName(cdnName);
-    if (! cdn.delete) throw new Error(`CDN ${cdnName} does not support deletion`);
+    if (!cdn.delete) throw new Error(`CDN ${cdnName} does not support deletion`);
 
     return cdn.delete(url);
   }
@@ -75,6 +73,7 @@ export default class CDNService extends Service {
   async download(cdnName: string, url: string): Promise<Buffer> {
     return this.getCDNByName(cdnName).download(url);
   }
+
   /**
    * Checks if a file exists in the CDN.
    * @param cdnName

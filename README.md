@@ -1,4 +1,4 @@
-# @token-ring/cdn
+# @tokenring-ai/cdn
 
 This package provides an abstract CDN service interface for uploading and managing files in content delivery networks.
 
@@ -6,9 +6,11 @@ This package provides an abstract CDN service interface for uploading and managi
 
 ### CDNService (Abstract Base Class)
 
-The abstract `CDNService` class defines a standardized interface for CDN operations. Concrete implementations should extend this class.
+The abstract `CDNService` class defines a standardized interface for CDN operations. Concrete implementations should
+extend this class.
 
 **Key Methods:**
+
 - `upload(data: Buffer, options?: UploadOptions): Promise<UploadResult>` - Upload data to CDN
 - `delete(url: string): Promise<DeleteResult>` - Delete file from CDN by URL
 - `exists(url: string): Promise<boolean>` - Check if file exists in CDN
