@@ -24,7 +24,7 @@ export interface DeleteResult {
  * for CDN operations, allowing for different implementations of CDN services.
  */
 export default class CDNService implements TokenRingService {
-  name = "CDN";
+  name = "CDNService";
   description = "Abstract interface for CDN operations";
 
   private cdnResourceRegistry = new KeyedRegistryWithSingleSelection<CDNResource>();
