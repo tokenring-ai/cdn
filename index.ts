@@ -10,4 +10,4 @@ export const packageInfo: TokenRingPackage = {
 
 
 export {default as CDNService} from "./CDNService.ts";
-export {default as CDNResource} from "./CDNResource.ts";
+export {default as CDNProvider} from "./CDNProvider.ts";

@@ -21,7 +21,7 @@ export interface DeleteResult {
  * CDN is an abstract class that provides a unified interface
  * for CDN operations, allowing for different implementations of CDN services.
  */
-export default class CDNResource {
+export default class CDNProvider {
   /**
    * Uploads a file to the CDN.
    * @param _data
