@@ -1,21 +1,4 @@
-import fetch from 'node-fetch';
-
-export interface UploadOptions {
-  filename?: string;
-  contentType?: string;
-  metadata?: Record<string, string>;
-}
-
-export interface UploadResult {
-  url: string;
-  id?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface DeleteResult {
-  success: boolean;
-  message?: string;
-}
+import type { UploadOptions, UploadResult, DeleteResult } from './types.js';
 
 /**
  * CDN is an abstract class that provides a unified interface
