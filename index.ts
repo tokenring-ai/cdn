@@ -8,7 +8,7 @@ export const CDNConfigSchema = z.object({
 }).optional();
 
 
-export const packageInfo: TokenRingPackage = {
+export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
@@ -19,7 +19,7 @@ export const packageInfo: TokenRingPackage = {
       agentTeam.services.register(service);
     }
   }
-};
+} as TokenRingPackage;
 
 export {default as CDNService} from "./CDNService.ts";
 export {default as CDNProvider} from "./CDNProvider.ts";
