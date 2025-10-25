@@ -16,7 +16,7 @@ export default {
     const config = agentTeam.getConfigSlice('cdn', CDNConfigSchema);
     if (config) {
       const service = new CDNService();
-      agentTeam.services.register(service);
+      agentTeam.addServices(service);
     }
   }
 } as TokenRingPackage;
