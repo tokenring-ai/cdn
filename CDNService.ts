@@ -1,7 +1,7 @@
 import {TokenRingService} from "@tokenring-ai/agent/types";
 import KeyedRegistryWithSingleSelection from "@tokenring-ai/utility/KeyedRegistryWithSingleSelection";
 import CDNProvider from "./CDNProvider.js";
-import type { UploadOptions, UploadResult, DeleteResult } from './types.js';
+import type {DeleteResult, UploadOptions, UploadResult} from './types.js';
 
 /**
  * CDN is an abstract class that provides a unified interface
@@ -18,7 +18,7 @@ export default class CDNService implements TokenRingService {
 
   getCDNByName(cdnName: string): CDNProvider {
     const cdn = this.providers.getItemByName(cdnName);
-    if (! cdn) throw new Error(
+    if (!cdn) throw new Error(
       `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`
     )
 
