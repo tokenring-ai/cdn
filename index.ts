@@ -1,4 +1,5 @@
-import {AgentTeam, TokenRingPackage} from "@tokenring-ai/agent";
+import TokenRingApp from "@tokenring-ai/app";
+import {TokenRingPlugin} from "@tokenring-ai/app";
 import {z} from "zod";
 import CDNService from "./CDNService.ts";
 import packageJSON from './package.json' with {type: 'json'};
@@ -12,14 +13,14 @@ export default {
   name: packageJSON.name,
   version: packageJSON.version,
   description: packageJSON.description,
-  install(agentTeam: AgentTeam) {
-    const config = agentTeam.getConfigSlice('cdn', CDNConfigSchema);
+  install(app: TokenRingApp) {
+    const config = app.getConfigSlice('cdn', CDNConfigSchema);
     if (config) {
       const service = new CDNService();
-      agentTeam.addServices(service);
+      app.addServices(service);
     }
   }
-} as TokenRingPackage;
+} as TokenRingPlugin;
 
 export {default as CDNService} from "./CDNService.ts";
 export {default as CDNProvider} from "./CDNProvider.ts";
