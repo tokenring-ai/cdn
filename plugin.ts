@@ -16,4 +16,4 @@ export default {
       app.addServices(service);
     }
   }
-} as TokenRingPlugin;
+} satisfies TokenRingPlugin;
