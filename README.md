@@ -14,6 +14,7 @@ This package provides a flexible and extensible CDN management system that allow
 - **Plugin Integration**: Seamless integration with Token Ring applications via service registry
 - **TypeScript Support**: Full type safety with comprehensive type definitions
 - **Zod Validation**: Configuration validation using Zod schemas
+- **Service Registry**: Built on Token Ring's KeyedRegistry for provider management
 
 ## Installation
 
