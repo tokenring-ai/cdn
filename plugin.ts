@@ -13,7 +13,6 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app, config) {
-    // const config = app.getConfigSlice('cdn', CDNConfigSchema);
     if (config.cdn) {
       const service = new CDNService();
       app.addServices(service);
