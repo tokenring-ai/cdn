@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import type { UploadOptions, UploadResult, DeleteResult } from '../types.js';
+import {describe, expect, it} from 'vitest';
+import type {DeleteResult, UploadOptions, UploadResult} from '../types.js';
 
 // Mock CDNConfigSchema
 const CDNConfigSchema = {
