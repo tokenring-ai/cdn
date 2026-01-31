@@ -14,6 +14,7 @@ A CDN abstraction service for the Token Ring platform, providing a unified inter
 - **Plugin Integration**: Seamless integration with Token Ring applications via service registry
 - **Comprehensive Error Handling**: Clear error messages for common scenarios
 - **Flexible Configuration**: Customizable options for different CDN providers
+- **Default Implementations**: Built-in HTTP-based download and exists operations
 
 ## Installation
 
@@ -25,7 +26,7 @@ bun install @tokenring-ai/cdn
 
 ### CDNService
 
-The main service class that manages CDN operations and provider registration. Implements `TokenRingService` interface.
+The main service class that manages CDN operations and provider registration. Implements `TokenRingService` interface and is automatically registered with the Token Ring application when the plugin is installed.
 
 ```typescript
 import CDNService from "./CDNService.ts";
@@ -37,6 +38,7 @@ const cdnService = new CDNService();
 
 - **registerProvider(name: string, provider: CDNProvider): void**
   - Register a CDN provider with a unique name
+  - Uses KeyedRegistry internally for provider management
   - Example: `cdnService.registerProvider('s3', new S3CDNProvider())`
 
 - **getCDNByName(cdnName: string): CDNProvider**
@@ -80,7 +82,7 @@ const cdnService = new CDNService();
 
 ### CDNProvider
 
-Abstract base class for implementing CDN providers.
+Abstract base class for implementing CDN providers. All CDN providers must extend this class and implement the required methods.
 
 ```typescript
 import CDNProvider from "./CDNProvider.ts";
@@ -96,7 +98,7 @@ class MyCDNProvider extends CDNProvider {
   - Implement upload logic for your CDN provider
   - Parameters:
     - `data`: The file content as Buffer
-    - `options`: Optional upload parameters
+    - `options`: Optional upload parameters (filename, contentType, metadata)
   - Returns: Promise resolving to `UploadResult` with url, optional id, and metadata
   - Throws: Must be implemented by subclass
 
@@ -123,6 +125,7 @@ class MyCDNProvider extends CDNProvider {
   - Parameters:
     - `url`: The URL of the file to check
   - Returns: Promise resolving to boolean
+  - Returns false on network errors
 
 ### Types
 
@@ -184,12 +187,15 @@ Each provider can define its own configuration schema, but typically includes:
 - `type`: Provider type identifier
 - Provider-specific parameters (e.g., bucket name for S3, API keys for Cloudflare)
 
+**Note**: The plugin checks if `config.cdn` exists in the configuration. If present, the CDNService is registered with the Token Ring application. The actual provider implementations are registered programmatically using `registerProvider()`.
+
 ## Plugin Integration
 
 As a Token Ring plugin, the CDN service automatically:
-- Registers the CDN service when the plugin is installed
-- Reads CDN configurations from the app's configuration slice using Zod validation
+- Checks for `config.cdn` configuration in the app settings
+- Registers the CDNService with the Token Ring application when the plugin is installed
 - Makes the service available through the Token Ring application registry
+- Uses KeyedRegistry internally for provider management
 
 ```typescript
 import plugin from "./plugin.ts";
@@ -198,7 +204,7 @@ import plugin from "./plugin.ts";
 app.use(plugin, {
   cdn: {
     providers: {
-      // Provider configurations
+      // Provider configurations (optional)
     }
   }
 });
@@ -243,7 +249,7 @@ const s3Exists = await cdnService.exists('s3', s3Result.url);
 
 ```typescript
 import CDNProvider from "@tokenring-ai/cdn";
-import type { UploadOptions, UploadResult, DeleteResult } from "./types.ts";
+import type { UploadOptions, UploadResult, DeleteResult } from "@tokenring-ai/cdn/types";
 
 class MyCustomCDNProvider extends CDNProvider {
   async upload(data: Buffer, options?: UploadOptions): Promise<UploadResult> {
