@@ -8,7 +8,7 @@ import type {DeleteResult, UploadOptions, UploadResult} from './types.js';
  * for CDN operations, allowing for different implementations of CDN services.
  */
 export default class CDNService implements TokenRingService {
-  name = "CDNService";
+  readonly name = "CDNService";
   description = "Abstract interface for CDN operations";
 
   private providers = new KeyedRegistry<CDNProvider>();
