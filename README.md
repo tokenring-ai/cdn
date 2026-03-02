@@ -2,7 +2,11 @@
 
 A CDN abstraction service for the Token Ring platform, providing a unified interface for managing content delivery networks. This package enables seamless integration with multiple CDN providers through a consistent API, designed as a Token Ring plugin that integrates with the Token Ring application framework using the service registry pattern.
 
-## Features
+## Overview
+
+The `@tokenring-ai/cdn` package provides a flexible CDN management system that allows Token Ring applications to work with multiple CDN providers through a unified API. It implements the Token Ring service pattern and integrates seamlessly with the application framework via plugins.
+
+## Key Features
 
 - **Multi-Provider Support**: Register and manage multiple CDN providers with a unified interface
 - **Unified API**: Consistent interface across different CDN implementations
@@ -12,7 +16,7 @@ A CDN abstraction service for the Token Ring platform, providing a unified inter
 - **Plugin Integration**: Seamless integration with Token Ring applications via service registry
 - **Comprehensive Error Handling**: Clear error messages for common scenarios
 - **Flexible Configuration**: Customizable options for different CDN providers
-- **Default Implementations**: Built-in HTTP-based download and exists operations
+- **Default Implementations**: Built-in HTTP-based download and exists operations using fetch
 
 ## Installation
 
@@ -24,7 +28,7 @@ bun install @tokenring-ai/cdn
 
 ### CDNService
 
-The main service class that manages CDN operations and provider registration. Implements `TokenRingService` interface and is automatically registered with the Token Ring application when the plugin is installed.
+The main service class that manages CDN operations and provider registration. Implements `TokenRingService` interface and is automatically registered with the Token Ring application when the plugin is installed with CDN configuration.
 
 ```typescript
 import CDNService from "@tokenring-ai/cdn";
@@ -32,17 +36,26 @@ import CDNService from "@tokenring-ai/cdn";
 const cdnService = new CDNService();
 ```
 
+#### Properties
+
+- **name**: `"CDNService"` - Service identifier for the Token Ring registry
+- **description**: `"Abstract interface for CDN operations"` - Human-readable service description
+
 #### Methods
 
-- **registerProvider(name: string, provider: CDNProvider): void**
+- **registerProvider**: `KeyedRegistry<CDNProvider>["register"]`
   - Register a CDN provider with a unique name
   - Uses KeyedRegistry internally for provider management
-  - Example: `cdnService.registerProvider('s3', new S3CDNProvider())`
+  - The name is automatically extracted from the provider instance
+  - Example: `cdnService.registerProvider(new S3CDNProvider())`
 
 - **getCDNByName(cdnName: string): CDNProvider**
   - Retrieves a registered CDN provider by name
   - Throws an error if the provider is not found
-  - Example: `const provider = cdnService.getCDNByName('s3')`
+  - Parameters:
+    - `cdnName`: The name of the registered CDN provider
+  - Returns: `CDNProvider` instance
+  - Throws: `Error` with message "CDN {cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider)."
 
 - **upload(cdnName: string, data: string | Buffer, options: UploadOptions): Promise<UploadResult>**
   - Upload data to a specific CDN provider
@@ -52,7 +65,7 @@ const cdnService = new CDNService();
     - `data`: The file content as string or Buffer
     - `options`: Optional upload parameters (filename, contentType, metadata)
   - Returns: Promise resolving to `UploadResult`
-  - Throws: Error if no CDN is set or provider not found
+  - Throws: Error if no CDN provider is found with the given name
 
 - **delete(cdnName: string, url: string): Promise<DeleteResult>**
   - Delete a file from a specific CDN provider
@@ -60,7 +73,7 @@ const cdnService = new CDNService();
     - `cdnName`: The name of the registered CDN provider
     - `url`: The URL of the file to delete
   - Returns: Promise resolving to `DeleteResult`
-  - Throws: Error if CDN not found or delete method not supported
+  - Throws: Error if CDN provider not found or delete method not supported by the provider
 
 - **download(cdnName: string, url: string): Promise<Buffer>**
   - Download a file from a specific CDN provider
@@ -68,7 +81,7 @@ const cdnService = new CDNService();
     - `cdnName`: The name of the registered CDN provider
     - `url`: The URL of the file to download
   - Returns: Promise resolving to Buffer containing file data
-  - Throws: Error if CDN not found or download fails
+  - Throws: Error if CDN provider not found or download fails
 
 - **exists(cdnName: string, url: string): Promise<boolean>**
   - Check if a file exists in a specific CDN provider
@@ -76,11 +89,11 @@ const cdnService = new CDNService();
     - `cdnName`: The name of the registered CDN provider
     - `url`: The URL of the file to check
   - Returns: Promise resolving to boolean indicating file existence
-  - Returns false if CDN not found (does not throw)
+  - Returns false if CDN provider not found (does not throw)
 
 ### CDNProvider
 
-Abstract base class for implementing CDN providers. All CDN providers must extend this class and implement the required methods.
+Abstract base class for implementing CDN providers. All CDN providers must extend this class and implement the required `upload` method. Default implementations are provided for `download` and `exists` using HTTP fetch.
 
 ```typescript
 import CDNProvider from "@tokenring-ai/cdn";
@@ -98,26 +111,27 @@ class MyCDNProvider extends CDNProvider {
     - `data`: The file content as Buffer
     - `options`: Optional upload parameters (filename, contentType, metadata)
   - Returns: Promise resolving to `UploadResult` with url, optional id, and metadata
-  - Throws: Must be implemented by subclass
+  - Throws: `Error` with message "Method 'upload' must be implemented by subclasses"
 
 - **delete?(url: string): Promise<DeleteResult>**
   - Delete a file from the CDN
   - Optional method with no default implementation
+  - Must be implemented if delete functionality is needed
   - Parameters:
     - `url`: The URL of the file to delete
   - Returns: Promise resolving to `DeleteResult`
 
 - **download(url: string): Promise<Buffer>**
   - Download a file from the CDN using HTTP GET via fetch
-  - Default: Uses fetch to download the file
+  - Default implementation provided
   - Parameters:
     - `url`: The URL of the file to download
   - Returns: Promise resolving to Buffer containing file data
-  - Throws: "Failed to download file: {statusText}" on HTTP errors
+  - Throws: `Error` with message "Failed to download file: {statusText}" on HTTP errors
 
 - **exists(url: string): Promise<boolean>**
   - Check if a file exists in the CDN using HTTP HEAD via fetch
-  - Default: Uses fetch HEAD request to check existence
+  - Default implementation provided
   - Parameters:
     - `url`: The URL of the file to check
   - Returns: Promise resolving to boolean
@@ -159,7 +173,14 @@ export interface DeleteResult {
 Zod schema for validating CDN configuration. Available as a named export from the package:
 
 ```typescript
-import {CDNConfigSchema} from "@tokenring-ai/cdn";
+import { CDNConfigSchema } from "@tokenring-ai/cdn";
+```
+
+Schema definition:
+```typescript
+z.object({
+  providers: z.record(z.string(), z.any())
+}).optional()
 ```
 
 ## Configuration
@@ -178,30 +199,125 @@ const config = {
 ```
 
 Each provider can define its own configuration schema, but typically includes:
-- `type`: Provider type identifier
 - Provider-specific parameters (e.g., bucket name for S3, API keys for Cloudflare)
 
 **Important:** The plugin checks if `config.cdn` exists in the configuration. If present, the CDNService is registered with the Token Ring application. The actual provider implementations must be registered programmatically using `registerProvider()` with your specific CDN implementation instances.
 
-## Plugin Integration
+## Services
 
-As a Token Ring plugin, the CDN service automatically:
-- Checks for `config.cdn` configuration in the app settings
-- Registers the CDNService with the Token Ring application when the plugin is installed
-- Makes the service available through the Token Ring application registry
-- Uses KeyedRegistry internally for provider management
+### CDNService
+
+The CDNService implements the `TokenRingService` interface and provides the following capabilities:
+
+- **Service Name**: `CDNService`
+- **Provider Management**: Uses KeyedRegistry to manage multiple CDN providers
+- **Operation Routing**: Routes CDN operations to the appropriate provider based on name
+- **Error Handling**: Provides clear error messages for common scenarios
+
+#### Service Registration
+
+When the CDN plugin is installed with configuration, the CDNService is automatically registered:
+
+```typescript
+// Plugin installation with CDN configuration
+app.use(CDNPlugin, { cdn: { providers: {} } });
+
+// Service is automatically available
+const cdnService = app.getService('CDNService');
+```
+
+## Provider Documentation
+
+### CDNProvider Interface
+
+The CDNProvider is an abstract class that provides a unified interface for CDN operations. All custom CDN providers must extend this class.
+
+#### Provider Implementation Pattern
+
+```typescript
+import CDNProvider from "@tokenring-ai/cdn";
+import type { UploadOptions, UploadResult, DeleteResult } from "@tokenring-ai/cdn";
+
+class CustomCDNProvider extends CDNProvider {
+  async upload(data: Buffer, options?: UploadOptions): Promise<UploadResult> {
+    // Implement upload logic
+    // Must return UploadResult with at least a url property
+  }
+
+  async delete?(url: string): Promise<DeleteResult> {
+    // Optional: Implement delete logic
+  }
+
+  // download() and exists() have default implementations
+}
+```
+
+#### Provider Registration
+
+Providers are registered with the CDNService using the KeyedRegistry pattern:
+
+```typescript
+const cdnService = new CDNService();
+const provider = new CustomCDNProvider();
+
+// Register provider - name is extracted from provider instance
+cdnService.registerProvider(provider);
+
+// Retrieve by name
+const retrievedProvider = cdnService.getCDNByName('custom');
+```
+
+## RPC Endpoints
+
+This package does not define RPC endpoints. CDN operations are accessed through the service registry pattern.
+
+## Chat Commands
+
+This package does not define chat commands. CDN operations are accessed programmatically through the CDNService.
+
+## Integration
+
+### Token Ring Application Integration
+
+The CDN package integrates with Token Ring applications through the plugin system:
+
+```typescript
+import TokenRingApp from "@tokenring-ai/app";
+import CDNPlugin from "@tokenring-ai/cdn";
+
+const app = new TokenRingApp();
+
+// Install plugin with CDN configuration
+app.use(CDNPlugin, { cdn: { providers: {} } });
+
+// Access the CDN service
+const cdnService = app.getService('CDNService');
+```
+
+### Agent System Integration
+
+The CDNService is registered with the Token Ring agent system, allowing agents to perform CDN operations through the service registry:
+
+```typescript
+// In an agent command or tool
+const cdnService = app.getService('CDNService');
+const result = await cdnService.upload('provider-name', fileBuffer, { 
+  filename: 'file.txt',
+  contentType: 'text/plain'
+});
+```
+
+### Plugin Registration
+
+The CDN plugin is registered as a Token Ring plugin:
 
 ```typescript
 import CDNPlugin from "@tokenring-ai/cdn";
 
-// In your app setup
-app.use(CDNPlugin);
-
-// Access the CDN service from the app
-const cdnService = app.getService('CDNService');
-
-// Register your CDN provider implementation
-cdnService.registerProvider('my-cdn', new MyCDNProvider());
+// Plugin properties
+CDNPlugin.name;        // "@tokenring-ai/cdn"
+CDNPlugin.version;     // "0.2.0"
+CDNPlugin.description; // "A CDN abstraction for Token Ring"
 ```
 
 ## Usage Examples
@@ -213,30 +329,14 @@ import TokenRingApp from "@tokenring-ai/app";
 import CDNPlugin from "@tokenring-ai/cdn";
 
 const app = new TokenRingApp();
-app.use(CDNPlugin);
+app.use(CDNPlugin, { cdn: { providers: {} } });
 app.start();
+
+// Access CDN service
+const cdnService = app.getService('CDNService');
 ```
 
-### Working with Multiple Providers
-
-```typescript
-// Register multiple providers
-cdnService.registerProvider('s3', new S3CDNProvider());
-cdnService.registerProvider('cloudflare', new CloudflareCDNProvider());
-
-// Upload to specific provider
-const s3Result = await cdnService.upload('s3', fileBuffer, { filename: 'file.txt' });
-const cloudflareResult = await cdnService.upload('cloudflare', fileBuffer, { filename: 'file.txt' });
-
-// Download from specific provider
-const s3Data = await cdnService.download('s3', s3Result.url);
-const cloudflareData = await cdnService.download('cloudflare', cloudflareResult.url);
-
-// Check if file exists
-const s3Exists = await cdnService.exists('s3', s3Result.url);
-```
-
-### Custom CDN Provider
+### Creating a Custom CDN Provider
 
 ```typescript
 import CDNProvider from "@tokenring-ai/cdn";
@@ -264,7 +364,36 @@ class MyCustomCDNProvider extends CDNProvider {
 }
 
 // Register the provider
-cdnService.registerProvider('custom', new MyCustomCDNProvider());
+const cdnService = new CDNService();
+cdnService.registerProvider(new MyCustomCDNProvider());
+```
+
+### Working with Multiple Providers
+
+```typescript
+import CDNService from "@tokenring-ai/cdn";
+
+const cdnService = new CDNService();
+
+// Register multiple providers
+cdnService.registerProvider(new S3CDNProvider());
+cdnService.registerProvider(new CloudflareCDNProvider());
+
+// Upload to specific provider
+const s3Result = await cdnService.upload('s3', fileBuffer, { 
+  filename: 'file.txt',
+  contentType: 'text/plain'
+});
+const cloudflareResult = await cdnService.upload('cloudflare', fileBuffer, { 
+  filename: 'file.txt'
+});
+
+// Download from specific provider
+const s3Data = await cdnService.download('s3', s3Result.url);
+const cloudflareData = await cdnService.download('cloudflare', cloudflareResult.url);
+
+// Check if file exists
+const s3Exists = await cdnService.exists('s3', s3Result.url);
 ```
 
 ### Using Default Provider Implementations
@@ -272,6 +401,8 @@ cdnService.registerProvider('custom', new MyCustomCDNProvider());
 CDNProvider provides default implementations for `download` and `exists` using fetch:
 
 ```typescript
+import CDNProvider from "@tokenring-ai/cdn";
+
 class HTTPCDNProvider extends CDNProvider {
   async upload(data: Buffer, options?: UploadOptions): Promise<UploadResult> {
     // Implement only upload - download and exists use defaults
@@ -282,30 +413,53 @@ class HTTPCDNProvider extends CDNProvider {
   // exists() uses default HEAD implementation
 }
 
-cdnService.registerProvider('http', new HTTPCDNProvider());
+const cdnService = new CDNService();
+cdnService.registerProvider(new HTTPCDNProvider());
 ```
 
-### Agent Integration
+### String to Buffer Conversion
 
-The CDNService is registered with the Token Ring agent system, allowing agents to perform CDN operations through the service registry. Agents can access the CDN service via `app.getService('CDNService')`.
+The CDNService automatically converts string data to Buffer:
 
 ```typescript
-// In an agent command or tool
-const cdnService = app.getService('CDNService');
-const result = await cdnService.upload('s3', fileBuffer, { filename: 'file.txt' });
+const cdnService = new CDNService();
+
+// String data is automatically converted to Buffer
+const result = await cdnService.upload('provider', 'Hello, World!', {
+  filename: 'hello.txt',
+  contentType: 'text/plain'
+});
+
+// Buffer data works directly
+const bufferResult = await cdnService.upload('provider', Buffer.from('Hello, World!'), {
+  filename: 'hello.txt'
+});
 ```
 
-## Error Handling
+## Best Practices
 
-The CDN service provides clear error handling for common scenarios:
+### Provider Implementation
 
-- **Provider Not Found**: `CDN {name} not found. Please register it first with registerCDN(cdnName, cdnProvider).`
-- **No Active CDN**: `No active CDN set. Please set an active CDN before {operation}.`
-- **Method Not Implemented**: `Method '{method}' must be implemented by subclasses`
-- **Download Failures**: `Failed to download file: {statusText}`
-- **Delete Not Supported**: `Active CDN does not support deletion`
+1. **Implement Required Methods**: Always implement the `upload` method as it's the only required method
+2. **Optional Delete**: Implement `delete` only if your CDN supports deletion
+3. **Leverage Defaults**: Use the default `download` and `exists` implementations for HTTP-based CDNs
+4. **Error Handling**: Provide clear error messages when operations fail
+5. **Metadata**: Include relevant metadata in upload results when available
 
-## Development
+### Service Usage
+
+1. **Provider Registration**: Register all providers before attempting to use them
+2. **Error Handling**: Handle errors from `getCDNByName` as it throws when provider is not found
+3. **Optional Operations**: Check if `delete` is available before calling it on a provider
+4. **Type Safety**: Use TypeScript for type-safe CDN operations
+
+### Configuration
+
+1. **Schema Validation**: Use the provided `CDNConfigSchema` for configuration validation
+2. **Provider Configurations**: Store provider-specific configurations in the `providers` object
+3. **Environment Variables**: Use environment variables for sensitive configuration values
+
+## Testing and Development
 
 ### Package Structure
 
@@ -327,12 +481,18 @@ pkg/cdn/
 
 ### Testing
 
-Run tests with:
+Run tests with bun:
 
 ```bash
 bun run test
 bun run test:coverage
+bun run test:watch
 ```
+
+Tests use vitest and cover:
+- CDNService provider registration and retrieval
+- CDNProvider default implementations
+- Type definitions and schemas
 
 ### Building
 
@@ -340,12 +500,39 @@ bun run test:coverage
 bun run build
 ```
 
-### Contribution Guidelines
+This runs TypeScript type checking with `tsc --noEmit`.
+
+### Development Guidelines
 
 - Follow existing code style and patterns
 - Add unit tests for new functionality
 - Update documentation for new features
 - Ensure all changes work with Token Ring agent framework
+- Use TypeScript strict mode
+- Maintain backward compatibility
+
+## Dependencies
+
+### Runtime Dependencies
+
+- `@tokenring-ai/app`: `0.2.0` - Token Ring application framework
+- `@tokenring-ai/chat`: `0.2.0` - Chat interface integration
+- `@tokenring-ai/agent`: `0.2.0` - Agent system integration
+- `@tokenring-ai/utility`: `0.2.0` - Utility functions including KeyedRegistry
+- `zod`: `^4.3.6` - Schema validation
+- `uuid`: `^13.0.0` - UUID generation
+
+### Dev Dependencies
+
+- `vitest`: `^4.0.18` - Testing framework
+- `typescript`: `^5.9.3` - TypeScript compiler
+
+## Related Components
+
+- **@tokenring-ai/app**: Base application framework with service management
+- **@tokenring-ai/agent**: Agent orchestration system
+- **@tokenring-ai/utility**: Utility functions including KeyedRegistry
+- **@tokenring-ai/chat**: Chat interface for human interaction
 
 ## License
 
