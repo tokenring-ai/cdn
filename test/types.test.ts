@@ -1,13 +1,6 @@
 import {describe, expect, it} from 'vitest';
+import {CDNConfigSchema} from '../index.js';
 import type {DeleteResult, UploadOptions, UploadResult} from '../types.js';
-
-// Mock CDNConfigSchema
-const CDNConfigSchema = {
-  safeParse: (data: any) => ({
-    success: true,
-    data: data
-  })
-};
 
 describe('CDN Types and Schemas', () => {
   describe('UploadOptions', () => {
@@ -100,12 +93,12 @@ describe('CDN Types and Schemas', () => {
     it('should handle success and failure cases', () => {
       const successResult: DeleteResult = {
         success: true,
-        content: 'Success message'
+        message: 'Success message'
       };
 
       const failureResult: DeleteResult = {
         success: false,
-        content: 'Failure message'
+        message: 'Failure message'
       };
 
       expect(successResult.success).toBe(true);
@@ -129,14 +122,11 @@ describe('CDN Types and Schemas', () => {
       }
     });
 
-    it('should validate config without providers', () => {
+    it('should reject config without providers property', () => {
       const configWithoutProviders = {};
 
       const result = CDNConfigSchema.safeParse(configWithoutProviders);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual(configWithoutProviders);
-      }
+      expect(result.success).toBe(false);
     });
 
     it('should handle empty providers object', () => {
@@ -177,6 +167,21 @@ describe('CDN Types and Schemas', () => {
         expect(result.data).toEqual(complexConfig);
       }
     });
+
+    it('should handle undefined config (schema is optional)', () => {
+      const result = CDNConfigSchema.safeParse(undefined);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty object (providers is required when object is provided)', () => {
+      const result = CDNConfigSchema.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    it('should accept object with providers property', () => {
+      const result = CDNConfigSchema.safeParse({ providers: {} });
+      expect(result.success).toBe(true);
+    });
   });
 
   describe('Type Compatibility', () => {
@@ -193,7 +198,7 @@ describe('CDN Types and Schemas', () => {
 
       const deleteResult: DeleteResult = {
         success: true,
-        content: 'Deleted'
+        message: 'Deleted'
       };
 
       // These should compile without TypeScript errors
@@ -256,6 +261,21 @@ describe('CDN Types and Schemas', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data).toEqual(configWithSpecialChars);
+      }
+    });
+
+    it('should handle numeric provider names', () => {
+      const configWithNumeric = {
+        providers: {
+          '1': { endpoint: 'https://example1.com' },
+          '123': { endpoint: 'https://example123.com' }
+        }
+      };
+
+      const result = CDNConfigSchema.safeParse(configWithNumeric);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data).toEqual(configWithNumeric);
       }
     });
   });

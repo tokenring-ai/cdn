@@ -121,17 +121,16 @@ describe('CDNService', () => {
       expect(mockProvider2.getUploadCount()).toBe(1);
     });
 
-    it('should throw error when uploading without active provider', async () => {
-      const emptyService = new CDNService();
+    it('should throw error when uploading without provider name', async () => {
       const data = Buffer.from('test data');
       
-      await expect(emptyService.upload(data)).rejects.toThrow();
+      await expect(cdnService.upload('', data, {})).rejects.toThrow();
     });
 
     it('should throw error when uploading to non-existent provider', async () => {
       const data = Buffer.from('test data');
       
-      await expect(cdnService.upload('non-existent', data)).rejects.toThrow('CDN non-existent not found');
+      await expect(cdnService.upload('non-existent', data, {})).rejects.toThrow('CDN non-existent not found');
     });
 
     it('should handle complex upload options', async () => {
@@ -146,6 +145,14 @@ describe('CDNService', () => {
       
       expect(result.url).toBe('complex.txt');
       expect(result.metadata).toEqual({ author: 'test', version: '1.0' });
+      expect(mockProvider1.getUploadCount()).toBe(1);
+    });
+
+    it('should handle string data conversion to Buffer', async () => {
+      const data = 'string test data';
+      const result = await cdnService.upload("provider1", data, { filename: 'string.txt' });
+      
+      expect(result.url).toBe('string.txt');
       expect(mockProvider1.getUploadCount()).toBe(1);
     });
   });
@@ -188,7 +195,7 @@ describe('CDNService', () => {
       await cdnService.upload('provider1', data, { filename: 'delete-test.txt' });
     });
 
-    it('should delete from active provider', async () => {
+    it('should delete from specific provider', async () => {
       const result = await cdnService.delete('provider1','delete-test.txt');
       
       expect(result).toEqual({

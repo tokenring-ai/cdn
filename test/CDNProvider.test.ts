@@ -1,6 +1,6 @@
 import {beforeEach, describe, expect, it, vi} from 'vitest';
 import CDNProvider from '../CDNProvider.js';
-import CDNService from "../CDNService";
+import CDNService from "../CDNService.js";
 import type {DeleteResult, UploadOptions, UploadResult} from '../types.js';
 
 // Test implementation of CDNProvider
@@ -77,25 +77,25 @@ describe('CDNProvider', () => {
       expect(provider).toBeInstanceOf(CDNProvider);
     });
 
-    it('should have default download implementation', async () => {
+    it('should have default download implementation that uses fetch', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
       });
       
-      global.fetch = mockFetch;
+      global.fetch = mockFetch as any;
       
       const data = await provider.download('https://example.com/test.txt');
       expect(data).toBeInstanceOf(Buffer);
       expect(mockFetch).toHaveBeenCalledWith('https://example.com/test.txt');
     });
 
-    it('should have default exists implementation', async () => {
+    it('should have default exists implementation that uses HEAD request', async () => {
       const mockFetch = vi.fn().mockResolvedValue({
         ok: true
       });
       
-      global.fetch = mockFetch;
+      global.fetch = mockFetch as any;
       
       const exists = await provider.exists('https://example.com/test.txt');
       expect(exists).toBe(true);
@@ -116,6 +116,10 @@ describe('CDNProvider', () => {
       });
       
       await expect(provider.download('https://example.com/test.txt')).rejects.toThrow('Failed to download file: Not Found');
+    });
+
+    it('should throw error when upload is not implemented', async () => {
+      await expect(provider.upload(Buffer.from('test'))).rejects.toThrow("Method 'upload' must be implemented by subclasses");
     });
   });
 
