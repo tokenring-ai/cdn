@@ -1,7 +1,7 @@
 import {TokenRingService} from "@tokenring-ai/app/types";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
-import CDNProvider from "./CDNProvider.js";
-import type {DeleteResult, UploadOptions, UploadResult} from './types.js';
+import CDNProvider from "./CDNProvider.ts";
+import type {DeleteResult, UploadOptions, UploadResult} from './types.ts';
 
 /**
  * CDN is an abstract class that provides a unified interface

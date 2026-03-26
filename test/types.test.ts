@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
-import {CDNConfigSchema} from '../index.js';
-import type {DeleteResult, UploadOptions, UploadResult} from '../types.js';
+import {CDNConfigSchema} from '../index.ts';
+import type {DeleteResult, UploadOptions, UploadResult} from '../types.ts';
 
 describe('CDN Types and Schemas', () => {
   describe('UploadOptions', () => {

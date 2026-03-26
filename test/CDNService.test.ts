@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
-import CDNProvider from '../CDNProvider.js';
-import CDNService from '../CDNService.js';
-import type {DeleteResult, UploadOptions, UploadResult} from '../types.js';
+import CDNProvider from '../CDNProvider.ts';
+import CDNService from '../CDNService.ts';
+import type {DeleteResult, UploadOptions, UploadResult} from '../types.ts';
 
 // Mock CDN Provider for testing
 class MockCDNProvider extends CDNProvider {

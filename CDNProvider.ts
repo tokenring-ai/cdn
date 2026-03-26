@@ -1,4 +1,4 @@
-import type {DeleteResult, UploadOptions, UploadResult} from './types.js';
+import type {DeleteResult, UploadOptions, UploadResult} from './types.ts';
 
 /**
  * CDN is an abstract class that provides a unified interface
