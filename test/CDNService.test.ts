@@ -87,13 +87,13 @@ describe('CDNService', () => {
 
     it('should throw error when getting non-existent provider', () => {
       expect(() => {
-        cdnService.getCDNByName('non-existent');
+        cdnService.requireCDNByName('non-existent');
       }).toThrow('CDN non-existent not found');
     });
 
     it('should get provider by name successfully', () => {
       cdnService.registerProvider('provider1', mockProvider1);
-      const provider = cdnService.getCDNByName('provider1');
+      const provider = cdnService.requireCDNByName('provider1');
       expect(provider).toBe(mockProvider1);
     });
   });

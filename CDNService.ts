@@ -15,11 +15,13 @@ export default class CDNService implements TokenRingService {
 
   registerProvider = this.providers.register;
 
-  getCDNByName(cdnName: string): CDNProvider {
+  requireCDNByName(cdnName: string): CDNProvider {
     const cdn = this.providers.getItemByName(cdnName);
-    if (!cdn) throw new Error(
-      `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`
-    )
+    if (!cdn) {
+      throw new Error(
+        `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`
+      );
+    }
 
     return cdn;
   }
@@ -30,7 +32,7 @@ export default class CDNService implements TokenRingService {
 
     if (typeof data === "string") data = Buffer.from(data);
 
-    return this.getCDNByName(cdnName).upload(data, options);
+    return this.requireCDNByName(cdnName).upload(data, options);
   }
 
   /**
@@ -41,8 +43,7 @@ export default class CDNService implements TokenRingService {
    * @throws An error if the deletion fails.
    */
   async delete(cdnName: string, url: string): Promise<DeleteResult> {
-    const cdn = this.getCDNByName(cdnName);
-    if (!cdn) throw new Error(`No active CDN set. Please set an active CDN before deleting.`);
+    const cdn = this.requireCDNByName(cdnName);
 
     if (!cdn.delete) throw new Error(`Active CDN does not support deletion`);
     return cdn.delete(url);
@@ -55,8 +56,7 @@ export default class CDNService implements TokenRingService {
    */
 
   async download(cdnName: string, url: string): Promise<Buffer> {
-    const cdn = this.getCDNByName(cdnName)
-    if (!cdn) throw new Error(`No active CDN set. Please set an active CDN before downloading.`);
+    const cdn = this.requireCDNByName(cdnName);
 
     return cdn.download(url);
   }
@@ -67,8 +67,7 @@ export default class CDNService implements TokenRingService {
    * @param url The URL of the file to check.
    */
   async exists(cdnName: string, url: string): Promise<boolean> {
-    const cdn = this.getCDNByName(cdnName);
-    if (!cdn) return false;
+    const cdn = this.requireCDNByName(cdnName);
 
     return cdn.exists(url);
   }
