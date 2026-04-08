@@ -14,6 +14,7 @@ export default class CDNService implements TokenRingService {
   private providers = new KeyedRegistry<CDNProvider>();
 
   registerProvider = this.providers.register;
+  getAvailableProviders = this.providers.getAllItemNames;
 
   requireCDNByName(cdnName: string): CDNProvider {
     const cdn = this.providers.getItemByName(cdnName);
