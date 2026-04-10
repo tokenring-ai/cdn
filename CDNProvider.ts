@@ -1,4 +1,4 @@
-import type {DeleteResult, UploadOptions, UploadResult} from './types.ts';
+import type {DeleteResult, UploadOptions, UploadResult} from "./types.ts";
 
 /**
  * CDN is an abstract class that provides a unified interface
@@ -10,7 +10,7 @@ export default class CDNProvider {
    * @param _data
    * @param _options
    */
-  async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+  upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
     throw new Error("Method 'upload' must be implemented by subclasses");
   }
 
@@ -40,9 +40,9 @@ export default class CDNProvider {
    */
   async exists(url: string): Promise<boolean> {
     try {
-      const response = await fetch(url, {method: 'HEAD'});
+      const response = await fetch(url, {method: "HEAD"});
       return response.ok;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

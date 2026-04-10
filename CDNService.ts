@@ -1,7 +1,7 @@
-import {TokenRingService} from "@tokenring-ai/app/types";
+import type {TokenRingService} from "@tokenring-ai/app/types";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
-import CDNProvider from "./CDNProvider.ts";
-import type {DeleteResult, UploadOptions, UploadResult} from './types.ts';
+import type CDNProvider from "./CDNProvider.ts";
+import type {DeleteResult, UploadOptions, UploadResult} from "./types.ts";
 
 /**
  * CDN is an abstract class that provides a unified interface
@@ -20,16 +20,22 @@ export default class CDNService implements TokenRingService {
     const cdn = this.providers.getItemByName(cdnName);
     if (!cdn) {
       throw new Error(
-        `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`
+        `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`,
       );
     }
 
     return cdn;
   }
 
-
-  async upload(cdnName: string, data: string | Buffer, options: UploadOptions): Promise<UploadResult> {
-    if (!cdnName) throw new Error("No active CDN set. Please set an active CDN before uploading.");
+  upload(
+    cdnName: string,
+    data: string | Buffer,
+    options: UploadOptions,
+  ): Promise<UploadResult> {
+    if (!cdnName)
+      throw new Error(
+        "No active CDN set. Please set an active CDN before uploading.",
+      );
 
     if (typeof data === "string") data = Buffer.from(data);
 
@@ -43,7 +49,7 @@ export default class CDNService implements TokenRingService {
    * @returns A promise that resolves to a DeleteResult object indicating the success of the deletion.
    * @throws An error if the deletion fails.
    */
-  async delete(cdnName: string, url: string): Promise<DeleteResult> {
+  delete(cdnName: string, url: string): Promise<DeleteResult> {
     const cdn = this.requireCDNByName(cdnName);
 
     if (!cdn.delete) throw new Error(`Active CDN does not support deletion`);
@@ -56,7 +62,7 @@ export default class CDNService implements TokenRingService {
    * @param url The URL of the file to download.
    */
 
-  async download(cdnName: string, url: string): Promise<Buffer> {
+  download(cdnName: string, url: string): Promise<Buffer> {
     const cdn = this.requireCDNByName(cdnName);
 
     return cdn.download(url);
@@ -67,7 +73,7 @@ export default class CDNService implements TokenRingService {
    * @param cdnName The name of the CDN to check.
    * @param url The URL of the file to check.
    */
-  async exists(cdnName: string, url: string): Promise<boolean> {
+  exists(cdnName: string, url: string): Promise<boolean> {
     const cdn = this.requireCDNByName(cdnName);
 
     return cdn.exists(url);
