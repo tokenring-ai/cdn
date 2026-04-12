@@ -179,6 +179,7 @@ import { CDNConfigSchema } from "@tokenring-ai/cdn";
 ```
 
 Schema definition:
+
 ```typescript
 z.object({
   providers: z.record(z.string(), z.any())
@@ -201,6 +202,7 @@ const config = {
 ```
 
 Each provider can define its own configuration schema, but typically includes:
+
 - Provider-specific parameters (e.g., bucket name for S3, API keys for Cloudflare)
 
 **Important:** The plugin checks if `config.cdn` exists in the configuration. If present, the CDNService is registered with the Token Ring application. The actual provider implementations must be registered programmatically using `registerProvider(name, provider)` with your specific CDN implementation instances.
@@ -529,6 +531,7 @@ bun run test:watch
 ```
 
 Tests use vitest and cover:
+
 - CDNService provider registration and retrieval
 - CDNProvider default implementations
 - Type definitions and schemas
