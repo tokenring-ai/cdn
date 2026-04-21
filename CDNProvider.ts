@@ -1,4 +1,4 @@
-import type {DeleteResult, UploadOptions, UploadResult} from "./types.ts";
+import type { DeleteResult, UploadOptions, UploadResult } from "./types.ts";
 
 /**
  * CDN is an abstract class that provides a unified interface
@@ -40,7 +40,7 @@ export default class CDNProvider {
    */
   async exists(url: string): Promise<boolean> {
     try {
-      const response = await fetch(url, {method: "HEAD"});
+      const response = await fetch(url, { method: "HEAD" });
       return response.ok;
     } catch {
       return false;
