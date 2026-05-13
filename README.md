@@ -69,60 +69,61 @@ const cdnService = new CDNService();
   Retrieves a registered CDN provider by name. Throws an error if the provider is not found.
 
   Parameters:
-  - `cdnName`: The name of the registered CDN provider
+- `cdnName`: The name of the registered CDN provider
 
-  Returns: `CDNProvider` instance
+Returns: `CDNProvider` instance
 
-  Throws: `Error` with message "CDN {cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider)."
+Throws: `Error` with message "CDN {cdnName} not found. Please register it first with registerCDN(cdnName,
+cdnProvider)."
 
 - **upload(cdnName: string, data: string | Buffer, options: UploadOptions): Promise**
 
   Upload data to a specific CDN provider. Converts string data to Buffer automatically.
 
   Parameters:
-  - `cdnName`: The name of the registered CDN provider
-  - `data`: The file content as string or Buffer
-  - `options`: Optional upload parameters (filename, contentType, metadata)
+- `cdnName`: The name of the registered CDN provider
+- `data`: The file content as string or Buffer
+- `options`: Optional upload parameters (filename, contentType, metadata)
 
-  Returns: Promise resolving to `UploadResult`
+Returns: Promise resolving to `UploadResult`
 
-  Throws: Error if no CDN provider is found with the given name
+Throws: Error if no CDN provider is found with the given name
 
 - **delete(cdnName: string, url: string): Promise**
 
   Delete a file from a specific CDN provider.
 
   Parameters:
-  - `cdnName`: The name of the registered CDN provider
-  - `url`: The URL of the file to delete
+- `cdnName`: The name of the registered CDN provider
+- `url`: The URL of the file to delete
 
-  Returns: Promise resolving to `DeleteResult`
+Returns: Promise resolving to `DeleteResult`
 
-  Throws: Error if CDN provider not found or delete method not supported by the provider
+Throws: Error if CDN provider not found or delete method not supported by the provider
 
 - **download(cdnName: string, url: string): Promise**
 
   Download a file from a specific CDN provider.
 
   Parameters:
-  - `cdnName`: The name of the registered CDN provider
-  - `url`: The URL of the file to download
+- `cdnName`: The name of the registered CDN provider
+- `url`: The URL of the file to download
 
-  Returns: Promise resolving to Buffer containing file data
+Returns: Promise resolving to Buffer containing file data
 
-  Throws: Error if CDN provider not found or download fails
+Throws: Error if CDN provider not found or download fails
 
 - **exists(cdnName: string, url: string): Promise**
 
   Check if a file exists in a specific CDN provider.
 
   Parameters:
-  - `cdnName`: The name of the registered CDN provider
-  - `url`: The URL of the file to check
+- `cdnName`: The name of the registered CDN provider
+- `url`: The URL of the file to check
 
-  Returns: Promise resolving to boolean indicating file existence
+Returns: Promise resolving to boolean indicating file existence
 
-  Returns false if CDN provider not found (does not throw)
+Returns false if CDN provider not found (does not throw)
 
 ### CDNProvider
 
@@ -144,44 +145,45 @@ class MyCDNProvider extends CDNProvider {
   Implement upload logic for your CDN provider.
 
   Parameters:
-  - `data`: The file content as Buffer
-  - `options`: Optional upload parameters (filename, contentType, metadata)
+- `data`: The file content as Buffer
+- `options`: Optional upload parameters (filename, contentType, metadata)
 
-  Returns: Promise resolving to `UploadResult` with url, optional id, and metadata
+Returns: Promise resolving to `UploadResult` with url, optional id, and metadata
 
-  Throws: `Error` with message "Method 'upload' must be implemented by subclasses"
+Throws: `Error` with message "Method 'upload' must be implemented by subclasses"
 
 - **delete?(url: string): Promise**
 
-  Delete a file from the CDN. Optional method with no default implementation. Must be implemented if delete functionality
+  Delete a file from the CDN. Optional method with no default implementation. Must be implemented if delete
+  functionality
   is needed.
 
   Parameters:
-  - `url`: The URL of the file to delete
+- `url`: The URL of the file to delete
 
-  Returns: Promise resolving to `DeleteResult`
+Returns: Promise resolving to `DeleteResult`
 
 - **download(url: string): Promise**
 
   Download a file from the CDN using HTTP GET via fetch. Default implementation provided.
 
   Parameters:
-  - `url`: The URL of the file to download
+- `url`: The URL of the file to download
 
-  Returns: Promise resolving to Buffer containing file data
+Returns: Promise resolving to Buffer containing file data
 
-  Throws: `Error` with message "Failed to download file: {statusText}" on HTTP errors
+Throws: `Error` with message "Failed to download file: {statusText}" on HTTP errors
 
 - **exists(url: string): Promise**
 
   Check if a file exists in the CDN using HTTP HEAD via fetch. Default implementation provided.
 
   Parameters:
-  - `url`: The URL of the file to check
+- `url`: The URL of the file to check
 
-  Returns: Promise resolving to boolean
+Returns: Promise resolving to boolean
 
-  Returns false on network errors
+Returns false on network errors
 
 ### Types
 
@@ -322,8 +324,8 @@ This package does not define RPC endpoints. CDN operations are accessed through 
 
 This package provides the following chat commands:
 
-| Command | Description |
-|---------|-------------|
+| Command              | Description                       |
+|----------------------|-----------------------------------|
 | `/cdn provider list` | List all registered CDN providers |
 
 ### /cdn provider list
