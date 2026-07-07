@@ -1,4 +1,5 @@
 import type { TokenRingService } from "@tokenring-ai/app/types";
+import { ConfigurationError } from "@tokenring-ai/app/types";
 import KeyedRegistry from "@tokenring-ai/utility/registry/KeyedRegistry";
 import type CDNProvider from "./CDNProvider.ts";
 import type { DeleteResult, UploadOptions, UploadResult } from "./types.ts";
@@ -19,14 +20,14 @@ export default class CDNService implements TokenRingService {
   requireCDNByName(cdnName: string): CDNProvider {
     const cdn = this.providers.get(cdnName);
     if (!cdn) {
-      throw new Error(`CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`);
+      throw new ConfigurationError(this.name, `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`);
     }
 
     return cdn;
   }
 
   upload(cdnName: string, data: string | Buffer, options: UploadOptions): Promise<UploadResult> {
-    if (!cdnName) throw new Error("No active CDN set. Please set an active CDN before uploading.");
+    if (!cdnName) throw new ConfigurationError(this.name, "No active CDN set. Please set an active CDN before uploading.");
 
     if (typeof data === "string") data = Buffer.from(data);
 
