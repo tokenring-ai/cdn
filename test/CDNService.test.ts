@@ -319,9 +319,9 @@ describe("CDNService", () => {
       const results = await Promise.all(promises);
 
       expect(results).toHaveLength(3);
-      expect(results[0].url).toBe("concurrent1.txt");
-      expect(results[1].url).toBe("concurrent2.txt");
-      expect(results[2].url).toBe("concurrent3.txt");
+      expect(results[0]?.url).toBe("concurrent1.txt");
+      expect(results[1]?.url).toBe("concurrent2.txt");
+      expect(results[2]?.url).toBe("concurrent3.txt");
       expect(mockProvider1.getUploadCount()).toBe(3);
     });
 

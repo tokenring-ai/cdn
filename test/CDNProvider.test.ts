@@ -115,7 +115,7 @@ describe("CDNProvider", () => {
     });
 
     it("should handle exists with network failure", async () => {
-      global.fetch = vi.fn().mockRejectedValue(new Error("Network error"));
+      global.fetch = vi.fn().mockRejectedValue(new Error("Network error")) as unknown as typeof fetch;
 
       const exists = await provider.exists("https://example.com/test.txt");
       expect(exists).toBe(false);
@@ -125,7 +125,7 @@ describe("CDNProvider", () => {
       global.fetch = vi.fn().mockResolvedValue({
         ok: false,
         statusText: "Not Found"
-      });
+      }) as unknown as typeof fetch;
 
       await expect(provider.download("https://example.com/test.txt")).rejects.toThrow("Failed to download file: Not Found");
     });
