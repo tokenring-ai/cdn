@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, mock } from "bun:test";
+import { beforeEach,describe,expect,it,mock } from "bun:test";
 import CDNProvider from "../CDNProvider.ts";
 import CDNService from "../CDNService.ts";
 import type { DeleteResult, UploadOptions, UploadResult } from "../types.ts";
@@ -19,7 +19,7 @@ class TestCDNProvider extends CDNProvider {
     return {
       url,
       id: url,
-      metadata: options?.metadata,
+      metadata: options?.metadata
     };
   }
 
@@ -40,7 +40,7 @@ class TestCDNProvider extends CDNProvider {
     }
     return {
       success: exists,
-      message: exists ? "Deleted successfully" : "File not found",
+      message: exists ? "Deleted successfully" : "File not found"
     };
   }
 
@@ -92,7 +92,7 @@ describe("CDNProvider", () => {
     it("should have default download implementation that uses fetch", async () => {
       const mockFetch = mock().mockResolvedValue({
         ok: true,
-        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4)),
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
       });
 
       global.fetch = mockFetch as any;
@@ -104,7 +104,7 @@ describe("CDNProvider", () => {
 
     it("should have default exists implementation that uses HEAD request", async () => {
       const mockFetch = mock().mockResolvedValue({
-        ok: true,
+        ok: true
       });
 
       global.fetch = mockFetch as any;
@@ -124,15 +124,14 @@ describe("CDNProvider", () => {
     it("should handle download with HTTP error", async () => {
       global.fetch = mock().mockResolvedValue({
         ok: false,
-        statusText: "Not Found",
+        statusText: "Not Found"
       }) as unknown as typeof fetch;
 
-      expect(provider.download("https://example.com/test.txt")).rejects.toThrow("Failed to download file: Not Found");
+      await expect(provider.download("https://example.com/test.txt")).rejects.toThrow("Failed to download file: Not Found");
     });
 
-    it("should throw error when upload is not implemented", () => {
-      // Base class throws synchronously when upload is not overridden
-      expect(() => provider.upload(Buffer.from("test"))).toThrow("Method 'upload' must be implemented by subclasses");
+    it("should throw error when upload is not implemented", async () => {
+      await expect(provider.upload(Buffer.from("test"))).rejects.toThrow("Method 'upload' must be implemented by subclasses");
     });
   });
 
@@ -141,7 +140,7 @@ describe("CDNProvider", () => {
       const data = Buffer.from("test data");
       const options: UploadOptions = {
         filename: "test.txt",
-        contentType: "text/plain",
+        contentType: "text/plain"
       };
 
       const result = await testProvider.upload(data, options);
@@ -149,7 +148,7 @@ describe("CDNProvider", () => {
       expect(result).toEqual({
         url: "test.txt",
         id: "test.txt",
-        metadata: undefined,
+        metadata: undefined
       });
       expect(testProvider.wasUploadCalled()).toBe(true);
     });
@@ -176,7 +175,7 @@ describe("CDNProvider", () => {
 
       expect(result).toEqual({
         success: true,
-        message: "Deleted successfully",
+        message: "Deleted successfully"
       });
       expect(testProvider.wasDeleteCalled()).toBe(true);
     });
@@ -200,7 +199,7 @@ describe("CDNProvider", () => {
     });
 
     it("should handle non-existent file in download", async () => {
-      expect(testProvider.download("non-existent.txt")).rejects.toThrow("File not found: non-existent.txt");
+      await expect(testProvider.download("non-existent.txt")).rejects.toThrow("File not found: non-existent.txt");
       expect(testProvider.wasDownloadCalled()).toBe(true);
     });
 
@@ -208,7 +207,7 @@ describe("CDNProvider", () => {
       const result = await testProvider.delete("non-existent.txt");
       expect(result).toEqual({
         success: false,
-        message: "File not found",
+        message: "File not found"
       });
       expect(testProvider.wasDeleteCalled()).toBe(true);
     });
@@ -220,7 +219,7 @@ describe("CDNProvider", () => {
       const options: UploadOptions = {
         filename: "custom-name.txt",
         contentType: "text/plain",
-        metadata: { author: "test", version: "1.0" },
+        metadata: { author: "test", version: "1.0" }
       };
 
       const result = await testProvider.upload(data, options);
@@ -250,35 +249,35 @@ describe("CDNProvider", () => {
   describe("Error Handling", () => {
     it("should handle upload failures", async () => {
       class FailingProvider extends CDNProvider {
-        async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+        async upload(data: Buffer, options?: UploadOptions): Promise<UploadResult> {
           throw new Error("Upload failed");
         }
       }
 
       const failingProvider = new FailingProvider();
-      expect(failingProvider.upload(Buffer.from("test"))).rejects.toThrow("Upload failed");
+      await expect(failingProvider.upload(Buffer.from("test"))).rejects.toThrow("Upload failed");
     });
 
     it("should handle download failures", async () => {
       class FailingProvider extends CDNProvider {
-        async download(_url: string): Promise<Buffer> {
+        async download(url: string): Promise<Buffer> {
           throw new Error("Download failed");
         }
       }
 
       const failingProvider = new FailingProvider();
-      expect(failingProvider.download("test.txt")).rejects.toThrow("Download failed");
+      await expect(failingProvider.download("test.txt")).rejects.toThrow("Download failed");
     });
 
     it("should handle delete failures", async () => {
       class FailingProvider extends CDNProvider {
-        async delete(_url: string): Promise<DeleteResult> {
+        async delete(url: string): Promise<DeleteResult> {
           throw new Error("Delete failed");
         }
       }
 
       const failingProvider = new FailingProvider();
-      expect(failingProvider.delete("test.txt")).rejects.toThrow("Delete failed");
+      await expect(failingProvider.delete("test.txt")).rejects.toThrow("Delete failed");
     });
   });
 
@@ -298,7 +297,7 @@ describe("CDNProvider", () => {
 
     it("should handle CDNService error propagation", async () => {
       class FailingProvider extends CDNProvider {
-        async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+        async upload(data: Buffer, options?: UploadOptions): Promise<UploadResult> {
           throw new Error("Service unavailable");
         }
       }
@@ -308,7 +307,7 @@ describe("CDNProvider", () => {
 
       cdnService.registerProvider("failing", failingProvider);
 
-      expect(cdnService.upload("failing", Buffer.from("test"), {})).rejects.toThrow("Service unavailable");
+      await expect(cdnService.upload("failing", Buffer.from("test"), {})).rejects.toThrow("Service unavailable");
     });
   });
 
@@ -334,7 +333,7 @@ describe("CDNProvider", () => {
     });
 
     it("should handle binary data correctly", async () => {
-      const binaryData = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xff]);
+      const binaryData = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xFF]);
 
       const result = await testProvider.upload(binaryData, { filename: "binary.dat" });
       expect(result.url).toBe("binary.dat");
@@ -345,7 +344,12 @@ describe("CDNProvider", () => {
 
     it("should handle special characters in filenames", async () => {
       const data = Buffer.from("test");
-      const specialNames = ["file with spaces.txt", "file-with-dashes_and_underscores.txt", "file.with.dots.txt", "file@with#special$chars%.txt"];
+      const specialNames = [
+        "file with spaces.txt",
+        "file-with-dashes_and_underscores.txt",
+        "file.with.dots.txt",
+        "file@with#special$chars%.txt"
+      ];
 
       for (const filename of specialNames) {
         const result = await testProvider.upload(data, { filename });

@@ -8,7 +8,7 @@ describe("CDN Types and Schemas", () => {
       const options: UploadOptions = {
         filename: "test.txt",
         contentType: "text/plain",
-        metadata: { key: "value" },
+        metadata: { key: "value" }
       };
 
       expect(options.filename).toBe("test.txt");
@@ -19,10 +19,10 @@ describe("CDN Types and Schemas", () => {
     it("should allow optional fields", () => {
       const options1: UploadOptions = {};
       const options2: UploadOptions = {
-        filename: "test.txt",
+        filename: "test.txt"
       };
       const options3: UploadOptions = {
-        contentType: "text/plain",
+        contentType: "text/plain"
       };
 
       expect(options1).toBeDefined();
@@ -33,7 +33,7 @@ describe("CDN Types and Schemas", () => {
     it("should allow undefined metadata", () => {
       const options: UploadOptions = {
         filename: "test.txt",
-        metadata: undefined,
+        metadata: undefined
       };
 
       expect(options.metadata).toBeUndefined();
@@ -45,7 +45,7 @@ describe("CDN Types and Schemas", () => {
       const result: UploadResult = {
         url: "https://example.com/test.txt",
         id: "test-id",
-        metadata: { author: "test" },
+        metadata: { author: "test" }
       };
 
       expect(result.url).toBe("https://example.com/test.txt");
@@ -55,7 +55,7 @@ describe("CDN Types and Schemas", () => {
 
     it("should allow optional id", () => {
       const result: UploadResult = {
-        url: "https://example.com/test.txt",
+        url: "https://example.com/test.txt"
       };
 
       expect(result.id).toBeUndefined();
@@ -64,7 +64,7 @@ describe("CDN Types and Schemas", () => {
     it("should allow optional metadata", () => {
       const result: UploadResult = {
         url: "https://example.com/test.txt",
-        id: "test-id",
+        id: "test-id"
       };
 
       expect(result.metadata).toBeUndefined();
@@ -75,7 +75,7 @@ describe("CDN Types and Schemas", () => {
     it("should define correct structure", () => {
       const result: DeleteResult = {
         success: true,
-        message: "File deleted successfully",
+        message: "File deleted successfully"
       };
 
       expect(result.success).toBe(true);
@@ -84,7 +84,7 @@ describe("CDN Types and Schemas", () => {
 
     it("should allow optional message", () => {
       const result: DeleteResult = {
-        success: false,
+        success: false
       };
 
       expect(result.message).toBeUndefined();
@@ -93,12 +93,12 @@ describe("CDN Types and Schemas", () => {
     it("should handle success and failure cases", () => {
       const successResult: DeleteResult = {
         success: true,
-        message: "Success message",
+        message: "Success message"
       };
 
       const failureResult: DeleteResult = {
         success: false,
-        message: "Failure message",
+        message: "Failure message"
       };
 
       expect(successResult.success).toBe(true);
@@ -107,65 +107,80 @@ describe("CDN Types and Schemas", () => {
   });
 
   describe("CDNConfigSchema", () => {
-    it("should accept an empty object config", () => {
-      const result = CDNConfigSchema.safeParse({});
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should strip unknown keys from config", () => {
-      const result = CDNConfigSchema.safeParse({
+    it("should validate valid config", () => {
+      const validConfig = {
         providers: {
           provider1: { endpoint: "https://example1.com" },
-          provider2: { endpoint: "https://example2.com", apiKey: "key123" },
-        },
-      });
+          provider2: { endpoint: "https://example2.com", apiKey: "key123" }
+        }
+      };
+
+      const result = CDNConfigSchema.safeParse(validConfig);
       expect(result.success).toBe(true);
       if (result.success) {
-        // Schema is intentionally empty; unknown keys are stripped
-        expect(result.data).toEqual({});
+        expect(result.data).toEqual(validConfig);
       }
     });
 
-    it("should strip nested/complex unknown configuration", () => {
+    it("should reject config without providers property", () => {
+      const configWithoutProviders = {};
+
+      const result = CDNConfigSchema.safeParse(configWithoutProviders);
+      expect(result.success).toBe(false);
+    });
+
+    it("should handle empty providers object", () => {
+      const emptyProviders = {
+        providers: {}
+      };
+
+      const result = CDNConfigSchema.safeParse(emptyProviders);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.providers).toEqual({});
+      }
+    });
+
+    it("should accept any provider configuration", () => {
       const complexConfig = {
         providers: {
           provider1: {
             endpoint: "https://example.com",
             apiKey: "secret123",
             region: "us-west-2",
-            timeout: 5000,
+            timeout: 5000
           },
           provider2: {
-            simple: true,
+            simple: true
           },
-          provider3: ["array", "configuration", "values"],
-        },
+          provider3: [
+            "array",
+            "configuration",
+            "values"
+          ]
+        }
       };
 
       const result = CDNConfigSchema.safeParse(complexConfig);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({});
+        expect(result.data).toEqual(complexConfig);
       }
     });
 
-    it("should reject undefined config at the schema boundary", () => {
+    it("should handle undefined config (schema is optional)", () => {
       const result = CDNConfigSchema.safeParse(undefined);
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject empty object (providers is required when object is provided)", () => {
+      const result = CDNConfigSchema.safeParse({});
       expect(result.success).toBe(false);
     });
 
-    it("should reject null config", () => {
-      const result = CDNConfigSchema.safeParse(null);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject non-object config", () => {
-      expect(CDNConfigSchema.safeParse("cdn").success).toBe(false);
-      expect(CDNConfigSchema.safeParse(42).success).toBe(false);
-      expect(CDNConfigSchema.safeParse([]).success).toBe(false);
+    it("should accept object with providers property", () => {
+      const result = CDNConfigSchema.safeParse({ providers: {} });
+      expect(result.success).toBe(true);
     });
   });
 
@@ -173,17 +188,17 @@ describe("CDN Types and Schemas", () => {
     it("should maintain type compatibility across operations", () => {
       const options: UploadOptions = {
         filename: "test.txt",
-        contentType: "text/plain",
+        contentType: "text/plain"
       };
 
       const result: UploadResult = {
         url: "https://example.com/test.txt",
-        id: "test-id",
+        id: "test-id"
       };
 
       const deleteResult: DeleteResult = {
         success: true,
-        message: "Deleted",
+        message: "Deleted"
       };
 
       // These should compile without TypeScript errors
@@ -206,58 +221,61 @@ describe("CDN Types and Schemas", () => {
   });
 
   describe("Schema Validation Edge Cases", () => {
-    it("should strip deeply nested unknown configs", () => {
+    it("should handle deeply nested provider configs", () => {
       const nestedConfig = {
         providers: {
           complex: {
             nested: {
               deep: {
                 configuration: {
-                  value: "test",
-                },
-              },
+                  value: "test"
+                }
+              }
             },
-            array: [{ item: "value1" }, { item: "value2" }],
-          },
-        },
+            array: [
+              { item: "value1" },
+              { item: "value2" }
+            ]
+          }
+        }
       };
 
       const result = CDNConfigSchema.safeParse(nestedConfig);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({});
+        expect(result.data).toEqual(nestedConfig);
       }
     });
 
-    it("should strip unknown provider name keys", () => {
+    it("should handle special characters in provider names", () => {
       const configWithSpecialChars = {
         providers: {
           "provider-with-dashes": { endpoint: "https://example.com" },
-          provider_with_underscores: { endpoint: "https://example.com" },
+          "provider_with_underscores": { endpoint: "https://example.com" },
           "provider.with.dots": { endpoint: "https://example.com" },
-          provider123: { endpoint: "https://example.com" },
-        },
+          "provider123": { endpoint: "https://example.com" }
+        }
       };
 
       const result = CDNConfigSchema.safeParse(configWithSpecialChars);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({});
+        expect(result.data).toEqual(configWithSpecialChars);
       }
     });
 
-    it("should strip unknown numeric provider name keys", () => {
+    it("should handle numeric provider names", () => {
       const configWithNumeric = {
         providers: {
           "1": { endpoint: "https://example1.com" },
-          "123": { endpoint: "https://example123.com" },
-        },
-      } as const;
+          "123": { endpoint: "https://example123.com" }
+        }
+      };
 
       const result = CDNConfigSchema.safeParse(configWithNumeric);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data).toEqual({});
+        expect(result.data).toEqual(configWithNumeric);
       }
     });
   });
