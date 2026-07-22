@@ -576,7 +576,6 @@ pkg/cdn/
 │   ├── CDNProvider.test.ts
 │   ├── CDNService.test.ts
 │   └── types.test.ts
-└── vitest.config.ts      # Test configuration
 ```
 
 ### Testing
@@ -589,7 +588,7 @@ bun run test:coverage
 bun run test:watch
 ```
 
-Tests use vitest and cover:
+Tests use bun test and cover:
 
 - CDNService provider registration and retrieval
 - CDNProvider default implementations
@@ -625,7 +624,7 @@ This runs TypeScript type checking with `tsc --noEmit`.
 
 ### Dev Dependencies
 
-- `vitest`: `^4.1.1` - Testing framework
+- `bun test` - Testing framework^4.1.1` - Testing framework
 - `typescript`: `^6.0.2` - TypeScript compiler
 
 ## Related Components
