@@ -1,24 +1,17 @@
 import { AgentCommandService } from "@tokenring-ai/agent";
 import type { TokenRingPlugin } from "@tokenring-ai/app";
-import { z } from "zod";
 import CDNService from "./CDNService.ts";
 import agentCommands from "./commands.ts";
-import { CDNConfigSchema } from "./index.ts";
 import packageJSON from "./package.json" with { type: "json" };
-
-const packageConfigSchema = z.object({
-  cdn: CDNConfigSchema.exactOptional(),
-});
 
 export default {
   name: packageJSON.name,
   displayName: "CDN Service",
   version: packageJSON.version,
   description: packageJSON.description,
-  install(app, _config) {
+  install(app) {
     const service = new CDNService();
     app.addServices(service);
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
   },
-  configSchema: packageConfigSchema,
-} satisfies TokenRingPlugin<typeof packageConfigSchema>;
+} satisfies TokenRingPlugin;

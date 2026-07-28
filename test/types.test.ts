@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test";
-import { CDNConfigSchema } from "../index.ts";
 import type { DeleteResult, UploadOptions, UploadResult } from "../types.ts";
 
 describe("CDN Types and Schemas", () => {
@@ -106,68 +105,6 @@ describe("CDN Types and Schemas", () => {
     });
   });
 
-  describe("CDNConfigSchema", () => {
-    it("should accept an empty object config", () => {
-      const result = CDNConfigSchema.safeParse({});
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should strip unknown keys from config", () => {
-      const result = CDNConfigSchema.safeParse({
-        providers: {
-          provider1: { endpoint: "https://example1.com" },
-          provider2: { endpoint: "https://example2.com", apiKey: "key123" },
-        },
-      });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        // Schema is intentionally empty; unknown keys are stripped
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should strip nested/complex unknown configuration", () => {
-      const complexConfig = {
-        providers: {
-          provider1: {
-            endpoint: "https://example.com",
-            apiKey: "secret123",
-            region: "us-west-2",
-            timeout: 5000,
-          },
-          provider2: {
-            simple: true,
-          },
-          provider3: ["array", "configuration", "values"],
-        },
-      };
-
-      const result = CDNConfigSchema.safeParse(complexConfig);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should reject undefined config at the schema boundary", () => {
-      const result = CDNConfigSchema.safeParse(undefined);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject null config", () => {
-      const result = CDNConfigSchema.safeParse(null);
-      expect(result.success).toBe(false);
-    });
-
-    it("should reject non-object config", () => {
-      expect(CDNConfigSchema.safeParse("cdn").success).toBe(false);
-      expect(CDNConfigSchema.safeParse(42).success).toBe(false);
-      expect(CDNConfigSchema.safeParse([]).success).toBe(false);
-    });
-  });
 
   describe("Type Compatibility", () => {
     it("should maintain type compatibility across operations", () => {
@@ -202,63 +139,6 @@ describe("CDN Types and Schemas", () => {
 
       expect(result.id).toBeUndefined();
       expect(result.metadata).toBeUndefined();
-    });
-  });
-
-  describe("Schema Validation Edge Cases", () => {
-    it("should strip deeply nested unknown configs", () => {
-      const nestedConfig = {
-        providers: {
-          complex: {
-            nested: {
-              deep: {
-                configuration: {
-                  value: "test",
-                },
-              },
-            },
-            array: [{ item: "value1" }, { item: "value2" }],
-          },
-        },
-      };
-
-      const result = CDNConfigSchema.safeParse(nestedConfig);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should strip unknown provider name keys", () => {
-      const configWithSpecialChars = {
-        providers: {
-          "provider-with-dashes": { endpoint: "https://example.com" },
-          provider_with_underscores: { endpoint: "https://example.com" },
-          "provider.with.dots": { endpoint: "https://example.com" },
-          provider123: { endpoint: "https://example.com" },
-        },
-      };
-
-      const result = CDNConfigSchema.safeParse(configWithSpecialChars);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
-    });
-
-    it("should strip unknown numeric provider name keys", () => {
-      const configWithNumeric = {
-        providers: {
-          "1": { endpoint: "https://example1.com" },
-          "123": { endpoint: "https://example123.com" },
-        },
-      } as const;
-
-      const result = CDNConfigSchema.safeParse(configWithNumeric);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data).toEqual({});
-      }
     });
   });
 });

@@ -15,6 +15,7 @@ export default class CDNService implements TokenRingService {
   private providers = new KeyedRegistry<CDNProvider>();
 
   registerProvider = this.providers.set;
+  unregisterProvider = this.providers.unregister;
   getAvailableProviders = this.providers.keysArray;
 
   requireCDNByName(cdnName: string): CDNProvider {
