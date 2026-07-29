@@ -105,7 +105,6 @@ describe("CDN Types and Schemas", () => {
     });
   });
 
-
   describe("Type Compatibility", () => {
     it("should maintain type compatibility across operations", () => {
       const options: UploadOptions = {
