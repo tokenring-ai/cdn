@@ -5,8 +5,7 @@
   "dependencies": {
     "@tokenring-ai/agent": "workspace:*",
     "@tokenring-ai/app": "workspace:*",
-    "@tokenring-ai/utility": "workspace:*",
-    "zod": "^4.4.3"
+    "@tokenring-ai/utility": "workspace:*"
   },
   "exports": {
     ".": "./index.ts",

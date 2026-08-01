@@ -359,7 +359,7 @@ The CDNService is registered with the Token Ring agent system, allowing agents t
 
 ```typescript
 // In an agent command or tool
-const cdnService = agent.requireServiceByType(CDNService);
+const cdnService = agent.requireService(CDNService);
 const result = await cdnService.upload('provider-name', fileBuffer, {
   filename: 'file.txt',
   contentType: 'text/plain'

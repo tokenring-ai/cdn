@@ -10,8 +10,7 @@ export default {
   version: packageJSON.version,
   description: packageJSON.description,
   install(app) {
-    const service = new CDNService();
-    app.addServices(service);
+    app.addService(new CDNService());
     app.waitForService(AgentCommandService, agentCommandService => agentCommandService.addAgentCommands(agentCommands));
   },
 } satisfies TokenRingPlugin;
