@@ -1,18 +1,13 @@
 import type { DeleteResult, UploadOptions, UploadResult } from "./types.ts";
 
 /**
- * CDN is an abstract class that provides a unified interface
- * for CDN operations, allowing for different implementations of CDN services.
+ * Abstract base class for CDN operations. Subclasses must implement `upload`.
  */
-export default class CDNProvider {
+export default abstract class CDNProvider {
   /**
    * Uploads a file to the CDN.
-   * @param _data
-   * @param _options
    */
-  upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
-    throw new Error("Method 'upload' must be implemented by subclasses");
-  }
+  abstract upload(data: Buffer, options?: UploadOptions): Promise<UploadResult>;
 
   /**
    * Optional method to delete a file from the CDN.

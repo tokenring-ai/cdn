@@ -7,6 +7,7 @@ export interface UploadOptions {
 export interface UploadResult {
   url: string;
   id?: string | undefined;
+  /** May include provider-enriched values beyond the string-only UploadOptions.metadata. */
   metadata?: Record<string, any> | undefined;
 }
 

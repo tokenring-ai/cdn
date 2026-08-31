@@ -5,8 +5,7 @@ import type CDNProvider from "./CDNProvider.ts";
 import type { DeleteResult, UploadOptions, UploadResult } from "./types.ts";
 
 /**
- * CDN is an abstract class that provides a unified interface
- * for CDN operations, allowing for different implementations of CDN services.
+ * Registry and router for named CDN providers.
  */
 export default class CDNService implements TokenRingService {
   readonly name = "CDNService";
@@ -21,18 +20,18 @@ export default class CDNService implements TokenRingService {
   requireCDNByName(cdnName: string): CDNProvider {
     const cdn = this.providers.get(cdnName);
     if (!cdn) {
-      throw new ConfigurationError(this.name, `CDN ${cdnName} not found. Please register it first with registerCDN(cdnName, cdnProvider).`);
+      throw new ConfigurationError(this.name, `CDN ${cdnName} not found. Please register it first with registerProvider(cdnName, cdnProvider).`);
     }
 
     return cdn;
   }
 
   upload(cdnName: string, data: string | Buffer, options: UploadOptions): Promise<UploadResult> {
-    if (!cdnName) throw new ConfigurationError(this.name, "No active CDN set. Please set an active CDN before uploading.");
+    if (!cdnName) throw new ConfigurationError(this.name, "A non-empty CDN name is required for upload.");
 
-    if (typeof data === "string") data = Buffer.from(data);
+    const buffer = typeof data === "string" ? Buffer.from(data) : data;
 
-    return this.requireCDNByName(cdnName).upload(data, options);
+    return this.requireCDNByName(cdnName).upload(buffer, options);
   }
 
   /**
@@ -45,7 +44,7 @@ export default class CDNService implements TokenRingService {
   delete(cdnName: string, url: string): Promise<DeleteResult> {
     const cdn = this.requireCDNByName(cdnName);
 
-    if (!cdn.delete) throw new Error(`Active CDN does not support deletion`);
+    if (!cdn.delete) throw new Error(`CDN '${cdnName}' does not support deletion`);
     return cdn.delete(url);
   }
 

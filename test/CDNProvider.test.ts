@@ -75,17 +75,24 @@ class TestCDNProvider extends CDNProvider {
   }
 }
 
+// Concrete subclass used to exercise default download/exists implementations
+class DefaultMethodsProvider extends CDNProvider {
+  async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+    return { url: "unused" };
+  }
+}
+
 describe("CDNProvider", () => {
   let provider: CDNProvider;
   let testProvider: TestCDNProvider;
 
   beforeEach(() => {
-    provider = new CDNProvider();
+    provider = new DefaultMethodsProvider();
     testProvider = new TestCDNProvider();
   });
 
   describe("Abstract Base Class", () => {
-    it("should be instantiable", () => {
+    it("should be extendable as a CDNProvider", () => {
       expect(provider).toBeInstanceOf(CDNProvider);
     });
 
@@ -128,11 +135,6 @@ describe("CDNProvider", () => {
       }) as unknown as typeof fetch;
 
       expect(provider.download("https://example.com/test.txt")).rejects.toThrow("Failed to download file: Not Found");
-    });
-
-    it("should throw error when upload is not implemented", () => {
-      // Base class throws synchronously when upload is not overridden
-      expect(() => provider.upload(Buffer.from("test"))).toThrow("Method 'upload' must be implemented by subclasses");
     });
   });
 
@@ -261,6 +263,10 @@ describe("CDNProvider", () => {
 
     it("should handle download failures", async () => {
       class FailingProvider extends CDNProvider {
+        async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+          return { url: "unused" };
+        }
+
         async download(_url: string): Promise<Buffer> {
           throw new Error("Download failed");
         }
@@ -272,6 +278,10 @@ describe("CDNProvider", () => {
 
     it("should handle delete failures", async () => {
       class FailingProvider extends CDNProvider {
+        async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+          return { url: "unused" };
+        }
+
         async delete(_url: string): Promise<DeleteResult> {
           throw new Error("Delete failed");
         }

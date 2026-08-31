@@ -137,7 +137,7 @@ describe("CDNService", () => {
       const data = Buffer.from("test data");
 
       // Empty cdnName throws synchronously (ConfigurationError)
-      expect(() => cdnService.upload("", data, {})).toThrow("No active CDN set. Please set an active CDN before uploading.");
+      expect(() => cdnService.upload("", data, {})).toThrow("A non-empty CDN name is required for upload.");
     });
 
     it("should throw error when uploading to non-existent provider", () => {
@@ -218,7 +218,7 @@ describe("CDNService", () => {
       expect(mockProvider1.getDeleteCount()).toBe(1);
     });
 
-    it("should delete from specific provider", async () => {
+    it("should delete from a different registered provider", async () => {
       cdnService.registerProvider("provider2", mockProvider2);
       const data = Buffer.from("provider2 data");
       await cdnService.upload("provider2", data, { filename: "provider2-delete.txt" });
@@ -230,6 +230,17 @@ describe("CDNService", () => {
         message: "File deleted successfully",
       });
       expect(mockProvider2.getDeleteCount()).toBe(1);
+    });
+
+    it("should throw when the named provider does not support deletion", () => {
+      class NoDeleteProvider extends CDNProvider {
+        async upload(_data: Buffer, _options?: UploadOptions): Promise<UploadResult> {
+          return { url: "unused" };
+        }
+      }
+
+      cdnService.registerProvider("no-delete", new NoDeleteProvider());
+      expect(() => cdnService.delete("no-delete", "any.txt")).toThrow("CDN 'no-delete' does not support deletion");
     });
 
     it("should handle non-existent file deletion", async () => {
